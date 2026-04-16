@@ -1,0 +1,4 @@
+/* reset mínimo — estilos ficam no componente */
+*, *::before, *::after {
+  box-sizing: border-box;
+}

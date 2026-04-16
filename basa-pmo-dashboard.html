@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BASA PMO — Governança MVP-1</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #f5f6f8;
+  --bg2: #ffffff;
+  --bg3: #f0f2f5;
+  --bg4: #e8eaed;
+  --border: #e2e5ea;
+  --border2: #c8cdd6;
+  --text: #1a1d23;
+  --text2: #4a5068;
+  --text3: #8b93a8;
+  --accent: #1a56db;
+  --accent2: #1447b8;
+  --green: #0d9966;
+  --green-bg: rgba(13,153,102,0.07);
+  --amber: #c07800;
+  --amber-bg: rgba(192,120,0,0.07);
+  --red: #d63030;
+  --red-bg: rgba(214,48,48,0.07);
+  --purple: #6b4fd8;
+  --purple-bg: rgba(107,79,216,0.07);
+  --teal: #0891b2;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* LAYOUT */
+.shell { display: flex; height: 100vh; overflow: hidden; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.logo {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+.logo-title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.2; }
+.logo-sub { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: var(--mono); }
+
+.nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 400;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+  user-select: none;
+}
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active {
+  background: var(--bg3);
+  color: var(--accent);
+  border-left-color: var(--accent);
+  font-weight: 500;
+}
+.nav-icon { font-size: 14px; width: 18px; text-align: center; }
+.nav-badge {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10px;
+  background: var(--red-bg);
+  color: var(--red);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(241,96,96,0.2);
+}
+.nav-badge.green {
+  background: var(--green-bg);
+  color: var(--green);
+  border-color: rgba(45,212,160,0.2);
+}
+
+.sidebar-footer {
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+}
+.drop-status {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: var(--mono);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.drop-bar { display: flex; gap: 3px; }
+.drop-seg {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg4);
+}
+.drop-seg.done { background: var(--green); }
+.drop-seg.wip { background: var(--amber); }
+.drop-seg.next { background: var(--border2); }
+
+/* MAIN */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+.topbar-title { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+.topbar-date {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+}
+.btn-export {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  padding: 5px 12px;
+  border-radius: 5px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.15s;
+}
+.btn-export:hover { background: var(--bg3); color: var(--text); }
+
+.content { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* PAGES */
+.page { display: none; }
+.page.active { display: block; }
+
+/* SECTION */
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+
+/* GRID */
+.grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 24px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-bottom: 24px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-bottom: 24px; }
+
+/* STAT CARD */
+.stat {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+.stat-val { font-size: 28px; font-weight: 600; font-family: var(--mono); line-height: 1; }
+.stat-lbl { font-size: 11px; color: var(--text2); margin-top: 6px; }
+.stat-sub { font-size: 10px; color: var(--text3); margin-top: 3px; font-family: var(--mono); }
+.v-red { color: var(--red); }
+.v-amber { color: var(--amber); }
+.v-green { color: var(--green); }
+.v-blue { color: var(--accent); }
+.v-purple { color: var(--purple); }
+
+/* CARD */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.card-title { font-size: 13px; font-weight: 500; flex: 1; }
+.card-body { padding: 16px; }
+
+/* BADGE */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+.b-red { background: var(--red-bg); color: var(--red); border: 1px solid rgba(241,96,96,0.25); }
+.b-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+.b-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(45,212,160,0.25); }
+.b-blue { background: rgba(79,142,247,0.1); color: var(--accent); border: 1px solid rgba(79,142,247,0.25); }
+.b-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(167,139,250,0.25); }
+.b-gray { background: rgba(90,100,128,0.15); color: var(--text2); border: 1px solid var(--border); }
+
+/* TABLE */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tbl th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text3);
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border);
+}
+.tbl td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  vertical-align: middle;
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: var(--bg3); }
+.tbl td.strong { color: var(--text); font-weight: 500; }
+
+/* RISK ROW */
+.risk-sev {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-r { background: var(--red); }
+.dot-a { background: var(--amber); }
+.dot-g { background: var(--green); }
+.dot-b { background: var(--accent); }
+
+/* PROGRESS BAR */
+.prog-wrap { width: 100%; height: 5px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
+.prog-bar { height: 100%; border-radius: 3px; }
+
+/* DROPS TIMELINE */
+.drops { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 0; margin-bottom: 24px; position: relative; }
+.drops::before {
+  content: '';
+  position: absolute;
+  top: 22px;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: var(--border);
+  z-index: 0;
+}
+.drop-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 1;
+}
+.drop-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  border: 2px solid;
+}
+.dc-done { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+.dc-wip { background: var(--amber-bg); border-color: var(--amber); color: var(--amber); }
+.dc-next { background: var(--bg3); border-color: var(--border2); color: var(--text3); }
+.drop-name { font-size: 10px; text-align: center; color: var(--text2); font-weight: 500; }
+.drop-sub2 { font-size: 9px; text-align: center; color: var(--text3); font-family: var(--mono); }
+
+/* ALERT BOX */
+.alert {
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  border-left: 3px solid;
+}
+.alert-red { background: var(--red-bg); border-color: var(--red); color: var(--text); }
+.alert-amber { background: var(--amber-bg); border-color: var(--amber); color: var(--text); }
+.alert-blue { background: rgba(79,142,247,0.08); border-color: var(--accent); color: var(--text); }
+.alert strong { font-weight: 600; }
+
+/* COMPLIANCE GRID */
+.comp-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 20px; }
+.comp-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+.comp-norm { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-bottom: 6px; }
+.comp-title { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+.comp-desc { font-size: 11px; color: var(--text2); line-height: 1.5; }
+.comp-status { margin-top: 10px; }
+
+/* CHECKLIST */
+.checklist { list-style: none; }
+.cl-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.cl-item:last-child { border-bottom: none; }
+.cl-box {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  margin-top: 1px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cl-box.checked { background: var(--green); border-color: var(--green); }
+.cl-box.checked::after { content: '✓'; font-size: 9px; color: #000; }
+.cl-box.partial { background: var(--amber-bg); border-color: var(--amber); }
+.cl-box.partial::after { content: '~'; font-size: 10px; color: var(--amber); }
+.cl-text { flex: 1; color: var(--text2); }
+.cl-text strong { color: var(--text); font-weight: 500; }
+.cl-norm { font-family: var(--mono); font-size: 10px; color: var(--text3); white-space: nowrap; margin-left: auto; padding-left: 8px; }
+
+/* PARTNER CARD */
+.partner-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.partner-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+.p-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.p-logo {
+  width: 36px; height: 36px;
+  border-radius: 6px;
+  background: var(--bg4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+.p-name { font-size: 13px; font-weight: 500; }
+.p-role { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+.p-row { display: flex; justify-content: space-between; font-size: 11px; padding: 4px 0; border-bottom: 1px solid var(--border); }
+.p-row:last-child { border-bottom: none; }
+.p-lbl { color: var(--text3); }
+.p-val { color: var(--text2); font-family: var(--mono); }
+
+/* AUDIT LOG */
+.audit-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.audit-item:last-child { border-bottom: none; }
+.audit-time { font-family: var(--mono); font-size: 10px; color: var(--text3); min-width: 80px; margin-top: 2px; }
+.audit-dot-wrap { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.audit-dot2 { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.audit-line { flex: 1; width: 1px; background: var(--border); margin-top: 4px; }
+.audit-content { flex: 1; }
+.audit-title { color: var(--text); font-weight: 500; margin-bottom: 2px; }
+.audit-desc { color: var(--text2); font-size: 11px; }
+
+/* GUIDE CARD */
+.guide-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.guide-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.guide-card:hover { border-color: var(--accent); }
+.g-icon { font-size: 20px; margin-bottom: 10px; }
+.g-title { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+.g-desc { font-size: 11px; color: var(--text2); line-height: 1.6; }
+.g-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+.g-tag { font-size: 10px; font-family: var(--mono); color: var(--text3); background: var(--bg4); padding: 2px 7px; border-radius: 3px; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg3); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* DIVIDER */
+.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+.row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+.col { flex: 1; min-width: 0; }
+
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tag { font-size: 10px; font-family: var(--mono); padding: 2px 7px; border-radius: 3px; background: var(--bg4); color: var(--text3); border: 1px solid var(--border); }
+
+.full-width { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-badge">BASA PMO</div>
+    <div class="logo-title">MVP-1 · Core Banking</div>
+    <div class="logo-sub">Governança · Riscos · Compliance</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="nav('visao')"><span class="nav-icon">⌂</span> Visão Geral</div>
+    <div class="nav-item" onclick="nav('riscos')"><span class="nav-icon">⚠</span> Riscos <span class="nav-badge">6 críticos</span></div>
+    <div class="nav-item" onclick="nav('mudancas')"><span class="nav-icon">↺</span> Mudanças <span class="nav-badge">4</span></div>
+    <div class="nav-item" onclick="nav('parceiros')"><span class="nav-icon">⊕</span> Parceiros</div>
+    <div class="nav-item" onclick="nav('issues')"><span class="nav-icon">⊘</span> Issues Críticas <span class="nav-badge">8</span></div>
+    <div class="nav-item" onclick="nav('auditoria')"><span class="nav-icon">▦</span> Auditoria</div>
+    <div class="nav-item" onclick="nav('compliance')"><span class="nav-icon">✓</span> Compliance <span class="nav-badge green">BACEN</span></div>
+    <div class="nav-item" onclick="nav('guias')"><span class="nav-icon">⊞</span> Guias Rápidos</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="drop-status">Progresso drops</div>
+    <div class="drop-bar">
+      <div class="drop-seg done"></div>
+      <div class="drop-seg done"></div>
+      <div class="drop-seg done"></div>
+      <div class="drop-seg wip"></div>
+      <div class="drop-seg next"></div>
+      <div class="drop-seg next"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;font-family:var(--mono);color:var(--text3)">
+      <span>D0–D2 ✓</span><span style="color:var(--amber)">D3 ⟳</span><span>D4–D5</span>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">Visão Geral</div>
+    <div class="topbar-date" id="topbar-date"></div>
+    <button class="btn-export" onclick="exportCSV()">⬇ Exportar</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ====== VISÃO GERAL ====== -->
+    <div class="page active" id="page-visao">
+      <div class="section-label">Status do projeto</div>
+      <div class="grid-4">
+        <div class="stat"><div class="stat-val v-amber">Drop 3</div><div class="stat-lbl">Em finalização</div><div class="stat-sub">PIX / TED / Pagamentos</div></div>
+        <div class="stat"><div class="stat-val v-red">6</div><div class="stat-lbl">Riscos críticos ativos</div><div class="stat-sub">Ação imediata requerida</div></div>
+        <div class="stat"><div class="stat-val v-amber">8</div><div class="stat-lbl">Issues em aberto</div><div class="stat-sub">4 com impacto em SLA</div></div>
+        <div class="stat"><div class="stat-val v-green">67%</div><div class="stat-lbl">Drops concluídos</div><div class="stat-sub">D0 · D1 · D2 entregues</div></div>
+      </div>
+
+      <div class="section-label">Timeline de drops</div>
+      <div class="drops">
+        <div class="drop-node">
+          <div class="drop-circle dc-done">D0</div>
+          <div class="drop-name">Fundacional</div>
+          <div class="drop-sub2">Infra · IAM · CI/CD</div>
+        </div>
+        <div class="drop-node">
+          <div class="drop-circle dc-done">D1</div>
+          <div class="drop-name">Conta + Onboarding</div>
+          <div class="drop-sub2">Cadastro · KYC</div>
+        </div>
+        <div class="drop-node">
+          <div class="drop-circle dc-done">D2</div>
+          <div class="drop-name">CC + Antifraude</div>
+          <div class="drop-sub2">Bureaux · Notif.</div>
+        </div>
+        <div class="drop-node">
+          <div class="drop-circle dc-wip">D3</div>
+          <div class="drop-name">PIX / TED</div>
+          <div class="drop-sub2">Cheque Especial</div>
+        </div>
+        <div class="drop-node">
+          <div class="drop-circle dc-next">D4</div>
+          <div class="drop-name">ATM / Regulatórios</div>
+          <div class="drop-sub2">CDB · APIs BACEN</div>
+        </div>
+        <div class="drop-node">
+          <div class="drop-circle dc-next">D5</div>
+          <div class="drop-name">Crédito / BackOffice</div>
+          <div class="drop-sub2">KYC/AML · Open Fin.</div>
+        </div>
+      </div>
+
+      <div class="alert alert-red">
+        <strong>Alerta Drop 3:</strong> Antes de ir a produção, 5 itens obrigatórios precisam de evidência: homologação DICT (PIX), MED implementado, homologação STR (TED), conformidade CMN 4.765 (Cheque Especial) e cobertura PLD/COAF para transferências.
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <div class="section-label">Entregáveis mensais obrigatórios (Anexo V)</div>
+          <div class="card">
+            <div class="card-body" style="padding:0">
+              <table class="tbl">
+                <thead><tr><th>Entregável</th><th>Prazo</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td class="strong">Relatório de Monitoramento de Riscos</td><td><span class="badge b-red">7º dia/mês</span></td><td><span class="badge b-amber">Pendente</span></td></tr>
+                  <tr><td class="strong">Relatório de Acompanhamento e Desempenho</td><td><span class="badge b-red">7º dia/mês</span></td><td><span class="badge b-amber">Pendente</span></td></tr>
+                  <tr><td class="strong">Atas de Reuniões assinadas</td><td><span class="badge b-amber">7º dia/mês</span></td><td><span class="badge b-green">Em dia</span></td></tr>
+                  <tr><td class="strong">Relatório de Solicitações de Mudança</td><td><span class="badge b-amber">7º dia/mês</span></td><td><span class="badge b-amber">Pendente</span></td></tr>
+                  <tr><td class="strong">Cronograma atualizado</td><td><span class="badge b-amber">7º dia/mês</span></td><td><span class="badge b-green">Em dia</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="section-label">Pré-requisitos produção Drop 3</div>
+          <div class="card">
+            <div class="card-body">
+              <ul class="checklist">
+                <li class="cl-item"><div class="cl-box"></div><div class="cl-text"><strong>Homologação DICT</strong> — BACEN</div><div class="cl-norm">Res. BCB 1/2020</div></li>
+                <li class="cl-item"><div class="cl-box"></div><div class="cl-text"><strong>MED implementado</strong> — fraudes PIX</div><div class="cl-norm">Art. 26</div></li>
+                <li class="cl-item"><div class="cl-box"></div><div class="cl-text"><strong>Homologação STR</strong> — TED</div><div class="cl-norm">Res. 4.282</div></li>
+                <li class="cl-item"><div class="cl-box partial"></div><div class="cl-text"><strong>Conformidade CMN 4.765</strong> — Overdraft</div><div class="cl-norm">CMN 4.765</div></li>
+                <li class="cl-item"><div class="cl-box"></div><div class="cl-text"><strong>Cobertura PLD/COAF</strong> — transferências</div><div class="cl-norm">Circ. 3.909</div></li>
+                <li class="cl-item"><div class="cl-box"></div><div class="cl-text"><strong>Testes stress PIX</strong> — SLA 99,9%</div><div class="cl-norm">Res. BCB 1</div></li>
+                <li class="cl-item"><div class="cl-box partial"></div><div class="cl-text"><strong>BCP/DRP</strong> — contingência SPI/STR</div><div class="cl-norm">Res. BCB 85</div></li>
+                <li class="cl-item"><div class="cl-box"></div><div class="cl-text"><strong>Plano de Transição</strong> aprovado BASA</div><div class="cl-norm">Anexo V 3.10</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== RISCOS ====== -->
+    <div class="page" id="page-riscos">
+      <div class="grid-4">
+        <div class="stat"><div class="stat-val v-red">6</div><div class="stat-lbl">Críticos</div><div class="stat-sub">Ação imediata</div></div>
+        <div class="stat"><div class="stat-val v-amber">14</div><div class="stat-lbl">Altos</div><div class="stat-sub">Planejar neste sprint</div></div>
+        <div class="stat"><div class="stat-val v-blue">22</div><div class="stat-lbl">Médios</div><div class="stat-sub">Monitoramento ativo</div></div>
+        <div class="stat"><div class="stat-val v-green">68</div><div class="stat-lbl">Baixos / Aceitos</div><div class="stat-sub">Revisão mensal</div></div>
+      </div>
+
+      <div class="alert alert-amber">
+        <strong>Dashboard Jira:</strong> O Jira registra 110 riscos mas o dashboard atual exibe apenas 100 devido a limitação de paginação na query JQL. Os 10 itens faltantes precisam ser verificados manualmente.
+      </div>
+
+      <div class="section-label">Riscos críticos — Drop 3 (PIX/TED/Pagamentos)</div>
+      <div class="card">
+        <div class="card-body" style="padding:0">
+          <table class="tbl">
+            <thead><tr><th>Severidade</th><th>Risco</th><th>Drop</th><th>Norma BACEN</th><th>Resposta</th><th>Owner</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="risk-sev"><div class="dot dot-r"></div><span class="badge b-red">Crítico</span></div></td>
+                <td class="strong">DICT não homologado — PIX bloqueado legalmente</td>
+                <td><span class="badge b-amber">D3</span></td>
+                <td><span class="badge b-purple">Res. BCB 1/2020</span></td>
+                <td><span class="badge b-red">Mitigar</span></td>
+                <td>TI / BACEN</td>
+              </tr>
+              <tr>
+                <td><div class="risk-sev"><div class="dot dot-r"></div><span class="badge b-red">Crítico</span></div></td>
+                <td class="strong">MED ausente — sem mecanismo de devolução fraudes PIX</td>
+                <td><span class="badge b-amber">D3</span></td>
+                <td><span class="badge b-purple">Art. 26 BCB 1</span></td>
+                <td><span class="badge b-red">Mitigar</span></td>
+                <td>Produto</td>
+              </tr>
+              <tr>
+                <td><div class="risk-sev"><div class="dot dot-r"></div><span class="badge b-red">Crítico</span></div></td>
+                <td class="strong">STR sem homologação — TED não pode operar</td>
+                <td><span class="badge b-amber">D3</span></td>
+                <td><span class="badge b-purple">Res. 4.282</span></td>
+                <td><span class="badge b-red">Mitigar</span></td>
+                <td>TI / BACEN</td>
+              </tr>
+              <tr>
+                <td><div class="risk-sev"><div class="dot dot-r"></div><span class="badge b-red">Crítico</span></div></td>
+                <td class="strong">CMN 4.765 — Cheque Especial sem evidência de conformidade</td>
+                <td><span class="badge b-amber">D3</span></td>
+                <td><span class="badge b-purple">CMN 4.765</span></td>
+                <td><span class="badge b-red">Mitigar</span></td>
+                <td>Produto / Jurídico</td>
+              </tr>
+              <tr>
+                <td><div class="risk-sev"><div class="dot dot-r"></div><span class="badge b-red">Crítico</span></div></td>
+                <td class="strong">PLD/COAF — monitoramento PIX/TED sem cobertura documentada</td>
+                <td><span class="badge b-amber">D3</span></td>
+                <td><span class="badge b-purple">Circ. 3.909</span></td>
+                <td><span class="badge b-red">Mitigar</span></td>
+                <td>Compliance</td>
+              </tr>
+              <tr>
+                <td><div class="risk-sev"><div class="dot dot-r"></div><span class="badge b-red">Crítico</span></div></td>
+                <td class="strong">SLA 99,9% PIX — sem evidência de teste de stress</td>
+                <td><span class="badge b-amber">D3</span></td>
+                <td><span class="badge b-purple">Res. BCB 1</span></td>
+                <td><span class="badge b-red">Mitigar</span></td>
+                <td>TI / QA</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-label">Riscos altos — Drops anteriores (gaps a corrigir)</div>
+      <div class="card">
+        <div class="card-body" style="padding:0">
+          <table class="tbl">
+            <thead><tr><th>Severidade</th><th>Risco</th><th>Drop</th><th>Norma</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge b-amber">Alto</span></td><td class="strong">KYC/CDD — evidência de Customer Due Diligence do Onboarding</td><td><span class="badge b-blue">D1</span></td><td><span class="badge b-purple">Circ. 3.909</span></td><td><span class="badge b-amber">Em análise</span></td></tr>
+              <tr><td><span class="badge b-amber">Alto</span></td><td class="strong">LGPD — consentimento e revogação sem evidência de teste</td><td><span class="badge b-blue">D1</span></td><td><span class="badge b-purple">LGPD Art.7</span></td><td><span class="badge b-amber">Em análise</span></td></tr>
+              <tr><td><span class="badge b-amber">Alto</span></td><td class="strong">Antifraude — cobertura de cenários sem relatório formal</td><td><span class="badge b-blue">D2</span></td><td><span class="badge b-purple">Res. 4.557</span></td><td><span class="badge b-amber">Em análise</span></td></tr>
+              <tr><td><span class="badge b-amber">Alto</span></td><td class="strong">Bureaux — base legal LGPD Art.7 VI não formalizada</td><td><span class="badge b-blue">D2</span></td><td><span class="badge b-purple">LGPD / BCB 87</span></td><td><span class="badge b-red">Pendente</span></td></tr>
+              <tr><td><span class="badge b-amber">Alto</span></td><td class="strong">CI/CD — processo de gestão de mudanças alinhado ao BASA</td><td><span class="badge b-blue">D0</span></td><td><span class="badge b-purple">Anexo V 3.3</span></td><td><span class="badge b-red">Pendente</span></td></tr>
+              <tr><td><span class="badge b-amber">Alto</span></td><td class="strong">APIs BACEN D4 (SISBAJUD, CCS) — homologação: iniciar agora</td><td><span class="badge b-gray">D4</span></td><td><span class="badge b-purple">BACEN/CNJ</span></td><td><span class="badge b-red">Não iniciado</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-label">Distribuição por categoria regulatória</div>
+      <div class="grid-4">
+        <div class="stat"><div class="stat-val v-red">18</div><div class="stat-lbl">Res. 4.557 / BCB 85</div><div class="stat-sub">Operacional + Ciberseg.</div></div>
+        <div class="stat"><div class="stat-val v-amber">12</div><div class="stat-lbl">Circ. 3.909 / COAF</div><div class="stat-sub">PLD / FT</div></div>
+        <div class="stat"><div class="stat-val v-purple">9</div><div class="stat-lbl">LGPD / BCB 87</div><div class="stat-sub">Dados / Privacidade</div></div>
+        <div class="stat"><div class="stat-val v-blue">71</div><div class="stat-lbl">Outros / Técnicos</div><div class="stat-sub">Escopo, Infra, Pessoas</div></div>
+      </div>
+    </div>
+
+    <!-- ====== MUDANÇAS ====== -->
+    <div class="page" id="page-mudancas">
+      <div class="grid-4">
+        <div class="stat"><div class="stat-val v-amber">4</div><div class="stat-lbl">Solicitações abertas</div><div class="stat-sub">Aguardando decisão</div></div>
+        <div class="stat"><div class="stat-val v-green">11</div><div class="stat-lbl">Aprovadas</div><div class="stat-sub">No ciclo atual</div></div>
+        <div class="stat"><div class="stat-val v-red">2</div><div class="stat-lbl">Rejeitadas</div><div class="stat-sub">Sem impacto no escopo</div></div>
+        <div class="stat"><div class="stat-val v-blue">3</div><div class="stat-lbl">Mudanças org. (OCM)</div><div class="stat-sub">Em execução</div></div>
+      </div>
+
+      <div class="alert alert-blue">
+        <strong>Atenção Anexo V:</strong> Qualquer alteração de cronograma deve ser encaminhada imediatamente ao BASA com relatório de impacto. Mudanças aprovadas pelo BASA substituem as datas anteriores para fins de apuração de SLA.
+      </div>
+
+      <div class="section-label">Solicitações de mudança abertas</div>
+      <div class="card">
+        <div class="card-body" style="padding:0">
+          <table class="tbl">
+            <thead><tr><th>#</th><th>Descrição</th><th>Tipo</th><th>Impacto</th><th>Solicitante</th><th>Status</th><th>Prazo decisão</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="strong" style="font-family:var(--mono)">MUD-041</td>
+                <td class="strong">Ajuste no limite noturno PIX — regra BACEN atualizada</td>
+                <td><span class="badge b-red">Regulatório</span></td>
+                <td><span class="badge b-amber">Médio</span></td>
+                <td>Compliance</td>
+                <td><span class="badge b-amber">Em análise BASA</span></td>
+                <td style="font-family:var(--mono);font-size:11px">3 dias</td>
+              </tr>
+              <tr>
+                <td class="strong" style="font-family:var(--mono)">MUD-042</td>
+                <td class="strong">Inclusão de campo PEP no onboarding D1</td>
+                <td><span class="badge b-purple">Funcional</span></td>
+                <td><span class="badge b-red">Alto</span></td>
+                <td>BASA / Jurídico</td>
+                <td><span class="badge b-amber">Aguardando aprovação</span></td>
+                <td style="font-family:var(--mono);font-size:11px">5 dias</td>
+              </tr>
+              <tr>
+                <td class="strong" style="font-family:var(--mono)">MUD-043</td>
+                <td class="strong">Alteração no fluxo de contingência TED (rota backup)</td>
+                <td><span class="badge b-blue">Técnico</span></td>
+                <td><span class="badge b-amber">Médio</span></td>
+                <td>Arquitetura</td>
+                <td><span class="badge b-green">Aprovada BASA</span></td>
+                <td style="font-family:var(--mono);font-size:11px">Em execução</td>
+              </tr>
+              <tr>
+                <td class="strong" style="font-family:var(--mono)">MUD-044</td>
+                <td class="strong">Postergação de entregáveis D4 (APIs BACEN) em 3 semanas</td>
+                <td><span class="badge b-amber">Cronograma</span></td>
+                <td><span class="badge b-red">Alto</span></td>
+                <td>CONTRATADA</td>
+                <td><span class="badge b-red">Pendente BASA</span></td>
+                <td style="font-family:var(--mono);font-size:11px">Urgente</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-label">Gestão de mudança organizacional (OCM)</div>
+      <div class="card">
+        <div class="card-body" style="padding:0">
+          <table class="tbl">
+            <thead><tr><th>Iniciativa OCM</th><th>Área impactada</th><th>Fase</th><th>Progresso</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="strong">Treinamento equipe operacional — PIX/TED</td>
+                <td>Operações / Agência</td>
+                <td><span class="badge b-amber">D3</span></td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div class="prog-wrap" style="width:100px"><div class="prog-bar" style="width:40%;background:var(--amber)"></div></div>
+                    <span style="font-family:var(--mono);font-size:11px;color:var(--text2)">40%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="strong">Capacitação compliance PLD — novo processo COAF</td>
+                <td>Compliance / Jurídico</td>
+                <td><span class="badge b-amber">D3</span></td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div class="prog-wrap" style="width:100px"><div class="prog-bar" style="width:60%;background:var(--amber)"></div></div>
+                    <span style="font-family:var(--mono);font-size:11px;color:var(--text2)">60%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="strong">Processo de gestão de mudanças alinhado ao BASA</td>
+                <td>TI / PMO</td>
+                <td><span class="badge b-blue">D0–D3</span></td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div class="prog-wrap" style="width:100px"><div class="prog-bar" style="width:25%;background:var(--red)"></div></div>
+                    <span style="font-family:var(--mono);font-size:11px;color:var(--text2)">25%</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== PARCEIROS ====== -->
+    <div class="page" id="page-parceiros">
+      <div class="section-label">Ecossistema de parceiros — MVP-1</div>
+      <div class="partner-grid">
+        <div class="partner-card">
+          <div class="p-head">
+            <div class="p-logo">TEM</div>
+            <div><div class="p-name">Temenos Transact</div><div class="p-role">Core Banking · Drop 0</div></div>
+            <span class="badge b-green" style="margin-left:auto">Ativo</span>
+          </div>
+          <div class="p-row"><span class="p-lbl">Tipo</span><span class="p-val">Software / SaaS</span></div>
+          <div class="p-row"><span class="p-lbl">Integração</span><span class="p-val">API REST / Temenos Connect</span></div>
+          <div class="p-row"><span class="p-lbl">SLA contratual</span><span class="p-val">99,9% disponibilidade</span></div>
+          <div class="p-row"><span class="p-lbl">Risco</span><span class="p-val" style="color:var(--amber)">Dependência crítica</span></div>
+          <div class="p-row"><span class="p-lbl">Res. 4.893 (nuvem)</span><span class="p-val" style="color:var(--amber)">Due diligence pendente</span></div>
+        </div>
+        <div class="partner-card">
+          <div class="p-head">
+            <div class="p-logo">NAI</div>
+            <div><div class="p-name">Naisco (Onboarding)</div><div class="p-role">Digital Onboarding · Drop 1</div></div>
+            <span class="badge b-green" style="margin-left:auto">Ativo</span>
+          </div>
+          <div class="p-row"><span class="p-lbl">Tipo</span><span class="p-val">Plataforma de identidade</span></div>
+          <div class="p-row"><span class="p-lbl">Integração</span><span class="p-val">API + Webhook</span></div>
+          <div class="p-row"><span class="p-lbl">KYC/CDD</span><span class="p-val" style="color:var(--amber)">Evidência pendente</span></div>
+          <div class="p-row"><span class="p-lbl">LGPD</span><span class="p-val" style="color:var(--amber)">DPA a formalizar</span></div>
+          <div class="p-row"><span class="p-lbl">Norma</span><span class="p-val">Circ. 3.909 / BCB 87</span></div>
+        </div>
+        <div class="partner-card">
+          <div class="p-head">
+            <div class="p-logo">BCN</div>
+            <div><div class="p-name">BACEN — SPI / DICT / STR</div><div class="p-role">Infraestrutura PIX · TED · D3</div></div>
+            <span class="badge b-red" style="margin-left:auto">Homolog. pendente</span>
+          </div>
+          <div class="p-row"><span class="p-lbl">DICT</span><span class="p-val" style="color:var(--red)">Não homologado</span></div>
+          <div class="p-row"><span class="p-lbl">STR (TED)</span><span class="p-val" style="color:var(--red)">Não homologado</span></div>
+          <div class="p-row"><span class="p-lbl">SPI (PIX)</span><span class="p-val" style="color:var(--amber)">Em processo</span></div>
+          <div class="p-row"><span class="p-lbl">MED</span><span class="p-val" style="color:var(--red)">Não implementado</span></div>
+          <div class="p-row"><span class="p-lbl">Prazo homolog.</span><span class="p-val">4–8 semanas típico</span></div>
+        </div>
+        <div class="partner-card">
+          <div class="p-head">
+            <div class="p-logo">TCH</div>
+            <div><div class="p-name">Techban / Banco24h</div><div class="p-role">ATM · Drop 4</div></div>
+            <span class="badge b-gray" style="margin-left:auto">Drop 4</span>
+          </div>
+          <div class="p-row"><span class="p-lbl">Tipo</span><span class="p-val">Rede ATM compartilhada</span></div>
+          <div class="p-row"><span class="p-lbl">Certificação</span><span class="p-val" style="color:var(--red)">Não iniciada</span></div>
+          <div class="p-row"><span class="p-lbl">Prazo cert.</span><span class="p-val">6–10 semanas</span></div>
+          <div class="p-row"><span class="p-lbl">Risco</span><span class="p-val" style="color:var(--red)">Dependência externa D4</span></div>
+          <div class="p-row"><span class="p-lbl">Ação</span><span class="p-val" style="color:var(--amber)">Iniciar processo agora</span></div>
+        </div>
+        <div class="partner-card">
+          <div class="p-head">
+            <div class="p-logo">CNJ</div>
+            <div><div class="p-name">CNJ — SISBAJUD</div><div class="p-role">Bloqueios Judiciais · D4–D5</div></div>
+            <span class="badge b-gray" style="margin-left:auto">Drop 4–5</span>
+          </div>
+          <div class="p-row"><span class="p-lbl">Tipo</span><span class="p-val">Sistema judicial federal</span></div>
+          <div class="p-row"><span class="p-lbl">Certificação</span><span class="p-val" style="color:var(--red)">Não iniciada</span></div>
+          <div class="p-row"><span class="p-lbl">Sandbox</span><span class="p-val" style="color:var(--red)">Não solicitado</span></div>
+          <div class="p-row"><span class="p-lbl">SLA resposta</span><span class="p-val" style="color:var(--red)">24h — obrigatório</span></div>
+          <div class="p-row"><span class="p-lbl">Risco legal</span><span class="p-val" style="color:var(--red)">Contempt of court</span></div>
+        </div>
+        <div class="partner-card">
+          <div class="p-head">
+            <div class="p-logo">DAT</div>
+            <div><div class="p-name">DATAPREV / INSS</div><div class="p-role">Benefícios INSS · Drop 5</div></div>
+            <span class="badge b-gray" style="margin-left:auto">Drop 5</span>
+          </div>
+          <div class="p-row"><span class="p-lbl">Tipo</span><span class="p-val">Órgão federal</span></div>
+          <div class="p-row"><span class="p-lbl">Integração</span><span class="p-val" style="color:var(--red)">Não iniciada</span></div>
+          <div class="p-row"><span class="p-lbl">Prazo homolog.</span><span class="p-val">6–10 semanas</span></div>
+          <div class="p-row"><span class="p-lbl">Dependência</span><span class="p-val" style="color:var(--red)">Crítica para D5</span></div>
+          <div class="p-row"><span class="p-lbl">Ação</span><span class="p-val" style="color:var(--amber)">Iniciar no Drop 4</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== ISSUES CRÍTICAS ====== -->
+    <div class="page" id="page-issues">
+      <div class="grid-4">
+        <div class="stat"><div class="stat-val v-red">3</div><div class="stat-lbl">Bloqueantes</div><div class="stat-sub">Impedem produção D3</div></div>
+        <div class="stat"><div class="stat-val v-amber">5</div><div class="stat-lbl">Críticas</div><div class="stat-sub">Impacto em SLA</div></div>
+        <div class="stat"><div class="stat-val v-blue">8</div><div class="stat-lbl">Total abertas</div><div class="stat-sub">Neste ciclo</div></div>
+        <div class="stat"><div class="stat-val v-green">3</div><div class="stat-lbl">Resolvidas</div><div class="stat-sub">Último sprint</div></div>
+      </div>
+
+      <div class="section-label">Issues bloqueantes — produção D3 impedida</div>
+      <div class="card">
+        <div class="card-body" style="padding:0">
+          <table class="tbl">
+            <thead><tr><th>#</th><th>Issue</th><th>Impacto</th><th>Responsável</th><th>Prazo</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="strong" style="font-family:var(--mono);color:var(--red)">ISS-088</td>
+                <td class="strong">DICT não homologado — PIX bloqueado em produção</td>
+                <td><span class="badge b-red">Bloqueante</span></td>
+                <td>TI + BACEN</td>
+                <td style="font-family:var(--mono);font-size:11px;color:var(--red)">Urgente</td>
+                <td><span class="badge b-red">Em aberto</span></td>
+              </tr>
+              <tr>
+                <td class="strong" style="font-family:var(--mono);color:var(--red)">ISS-091</td>
+                <td class="strong">MED (Mecanismo Especial Devolução) não implementado</td>
+                <td><span class="badge b-red">Bloqueante</span></td>
+                <td>Produto</td>
+                <td style="font-family:var(--mono);font-size:11px;color:var(--red)">Urgente</td>
+                <td><span class="badge b-red">Em aberto</span></td>
+              </tr>
+              <tr>
+                <td class="strong" style="font-family:var(--mono);color:var(--red)">ISS-094</td>
+                <td class="strong">Plano de Transição D3 — não validado pelo BASA</td>
+                <td><span class="badge b-red">Bloqueante</span></td>
+                <td>PMO</td>
+                <td style="font-family:var(--mono);font-size:11px;color:var(--red)">3 dias</td>
+                <td><span class="badge b-amber">Em revisão</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-label">Issues críticas — impacto em SLA / contrato</div>
+      <div class="card">
+        <div class="card-body" style="padding:0">
+          <table class="tbl">
+            <thead><tr><th>#</th><th>Issue</th><th>Drop</th><th>FI (multa/dia)</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="strong" style="font-family:var(--mono)">ISS-072</td>
+                <td class="strong">Relatório de riscos mensal — 2 meses sem entrega</td>
+                <td><span class="badge b-blue">D2–D3</span></td>
+                <td><span class="badge b-red">0,03 × dias × artefato</span></td>
+                <td><span class="badge b-red">Atrasado</span></td>
+              </tr>
+              <tr>
+                <td class="strong" style="font-family:var(--mono)">ISS-079</td>
+                <td class="strong">Base legal LGPD bureaux — contrato não formalizado</td>
+                <td><span class="badge b-blue">D2</span></td>
+                <td><span class="badge b-amber">Risco ANPD</span></td>
+                <td><span class="badge b-amber">Em negociação</span></td>
+              </tr>
+              <tr>
+                <td class="strong" style="font-family:var(--mono)">ISS-083</td>
+                <td class="strong">PenTest D1 — relatório de vulnerabilidades não entregue</td>
+                <td><span class="badge b-blue">D1</span></td>
+                <td><span class="badge b-amber">Res. BCB 85</span></td>
+                <td><span class="badge b-amber">Agendado</span></td>
+              </tr>
+              <tr>
+                <td class="strong" style="font-family:var(--mono)">ISS-096</td>
+                <td class="strong">Dimensionamento servidores produção D3 — sem aceite BASA</td>
+                <td><span class="badge b-amber">D3</span></td>
+                <td><span class="badge b-red">0,03/dia</span></td>
+                <td><span class="badge b-red">Atrasado 4 dias</span></td>
+              </tr>
+              <tr>
+                <td class="strong" style="font-family:var(--mono)">ISS-097</td>
+                <td class="strong">Certificação PCI-DSS cartão débito — não planejada no roadmap</td>
+                <td><span class="badge b-gray">D4</span></td>
+                <td><span class="badge b-amber">Risco D4</span></td>
+                <td><span class="badge b-red">Gap identificado</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== AUDITORIA ====== -->
+    <div class="page" id="page-auditoria">
+      <div class="grid-4">
+        <div class="stat"><div class="stat-val v-green">47</div><div class="stat-lbl">Eventos registrados</div><div class="stat-sub">Últimos 30 dias</div></div>
+        <div class="stat"><div class="stat-val v-amber">8</div><div class="stat-lbl">Mudanças de escopo</div><div class="stat-sub">Aprovadas pelo BASA</div></div>
+        <div class="stat"><div class="stat-val v-blue">23</div><div class="stat-lbl">Artefatos entregues</div><div class="stat-sub">Ciclo atual</div></div>
+        <div class="stat"><div class="stat-val v-red">3</div><div class="stat-lbl">Termos pendentes</div><div class="stat-sub">TAF / TADC / TADP</div></div>
+      </div>
+
+      <div class="section-label">Log de eventos recentes</div>
+      <div class="card">
+        <div class="card-body">
+          <div class="audit-item">
+            <div class="audit-time">16/04/2026</div>
+            <div class="audit-dot-wrap"><div class="audit-dot2 dot-r"></div><div class="audit-line"></div></div>
+            <div class="audit-content"><div class="audit-title">Issue crítica ISS-094 aberta — Plano de Transição D3 sem aceite BASA</div><div class="audit-desc">PMO identificou que o Plano de Transição do Drop 3 ainda não recebeu validação formal. Prazo contratual: 10 dias antes de produção.</div></div>
+          </div>
+          <div class="audit-item">
+            <div class="audit-time">15/04/2026</div>
+            <div class="audit-dot-wrap"><div class="audit-dot2 dot-a"></div><div class="audit-line"></div></div>
+            <div class="audit-content"><div class="audit-title">Solicitação de mudança MUD-044 submetida — postergação D4</div><div class="audit-desc">CONTRATADA solicitou postergação de 3 semanas para APIs Regulatórias BACEN (CCS, SIMBA). Aguarda decisão do BASA com relatório de impacto.</div></div>
+          </div>
+          <div class="audit-item">
+            <div class="audit-time">14/04/2026</div>
+            <div class="audit-dot-wrap"><div class="audit-dot2 dot-a"></div><div class="audit-line"></div></div>
+            <div class="audit-content"><div class="audit-title">MUD-043 aprovada — alteração fluxo contingência TED</div><div class="audit-desc">BASA aprovou a rota de fallback para indisponibilidade do STR. Nova configuração deve ser refletida no BCP/DRP antes da entrada em produção.</div></div>
+          </div>
+          <div class="audit-item">
+            <div class="audit-time">10/04/2026</div>
+            <div class="audit-dot-wrap"><div class="audit-dot2 dot-b"></div><div class="audit-line"></div></div>
+            <div class="audit-content"><div class="audit-title">Entregável mensal — Cronograma atualizado entregue (D3)</div><div class="audit-desc">Cronograma do Drop 3 atualizado e aceito pelo BASA. Relatório de riscos e atas ainda pendentes para fechar o ciclo mensal.</div></div>
+          </div>
+          <div class="audit-item">
+            <div class="audit-time">07/04/2026</div>
+            <div class="audit-dot-wrap"><div class="audit-dot2 dot-r"></div><div class="audit-line"></div></div>
+            <div class="audit-content"><div class="audit-title">Alerta SLA — ISS-096 detectada: aceite dimensionamento servidores em atraso</div><div class="audit-desc">Relatório de dimensionamento do ambiente de produção D3 não recebeu aceite do BASA. Multa de FI=0,03/dia aplicável a partir do 5º dia de atraso.</div></div>
+          </div>
+          <div class="audit-item">
+            <div class="audit-time">02/04/2026</div>
+            <div class="audit-dot-wrap"><div class="audit-dot2 dot-g"></div><div class="audit-line"></div></div>
+            <div class="audit-content"><div class="audit-title">Drop 2 — Termo de Aceitação da Fase (TAF) emitido pelo BASA</div><div class="audit-desc">Todos os entregáveis do Drop 2 (Conta Corrente + Antifraude + Bureaux) foram validados. TAF emitido autorizando faturamento do ciclo.</div></div>
+          </div>
+          <div class="audit-item">
+            <div class="audit-time">28/03/2026</div>
+            <div class="audit-dot-wrap"><div class="audit-dot2 dot-b"></div></div>
+            <div class="audit-content"><div class="audit-title">KickOff Drop 3 realizado — equipe alinhada ao refinamento do ciclo</div><div class="audit-desc">Reunião de abertura do ciclo D3 com BASA. Apresentação do refinamento do planejamento, equipe alocada e lições aprendidas do Drop 2.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== COMPLIANCE ====== -->
+    <div class="page" id="page-compliance">
+      <div class="section-label">Marco regulatório obrigatório — BACEN / CMN</div>
+      <div class="comp-grid">
+        <div class="comp-card">
+          <div class="comp-norm">Res. CMN 4.557</div>
+          <div class="comp-title">Gerenciamento de Riscos</div>
+          <div class="comp-desc">POPR obrigatório. Cobre riscos de crédito, mercado, liquidez, operacional e cibernético. Exige documentação de todos os controles.</div>
+          <div class="comp-status"><span class="badge b-amber">Parcialmente atendido</span></div>
+        </div>
+        <div class="comp-card">
+          <div class="comp-norm">Res. BCB 85/2021</div>
+          <div class="comp-title">Segurança Cibernética</div>
+          <div class="comp-desc">Política de segurança cibernética, PCTI, teste periódico de vulnerabilidades (PenTest) e gestão de incidentes de segurança.</div>
+          <div class="comp-status"><span class="badge b-red">PenTest pendente</span></div>
+        </div>
+        <div class="comp-card">
+          <div class="comp-norm">LGPD + Res. BCB 87</div>
+          <div class="comp-title">Proteção de Dados</div>
+          <div class="comp-desc">Consentimento, portabilidade e retenção mínima de 5 anos para dados financeiros. DPA com fornecedores obrigatório.</div>
+          <div class="comp-status"><span class="badge b-amber">DPA bureaux pendente</span></div>
+        </div>
+        <div class="comp-card">
+          <div class="comp-norm">Res. CMN 4.893</div>
+          <div class="comp-title">Serviços em Nuvem</div>
+          <div class="comp-desc">Due diligence formal de fornecedores cloud, rastreabilidade de dados e SLA contratual mínimo documentado.</div>
+          <div class="comp-status"><span class="badge b-red">Due diligence pendente</span></div>
+        </div>
+        <div class="comp-card">
+          <div class="comp-norm">Circular BACEN 3.909</div>
+          <div class="comp-title">PLD / FT (Anti-Lavagem)</div>
+          <div class="comp-desc">KYC rigoroso, monitoramento de transações suspeitas e reporte ao COAF. Cobertura obrigatória para PIX e TED.</div>
+          <div class="comp-status"><span class="badge b-red">Cobertura PIX/TED pendente</span></div>
+        </div>
+        <div class="comp-card">
+          <div class="comp-norm">Res. BCB 1/2020</div>
+          <div class="comp-title">Open Finance / PIX</div>
+          <div class="comp-desc">DICT, SPI, MED, limites dia/noite, certificação FAPI, disponibilidade 99,9% e sandbox regulatório obrigatórios.</div>
+          <div class="comp-status"><span class="badge b-red">DICT/MED não homologados</span></div>
+        </div>
+        <div class="comp-card">
+          <div class="comp-norm">CMN 4.765</div>
+          <div class="comp-title">Cheque Especial</div>
+          <div class="comp-desc">Limita spread do cheque especial. Exige comunicação clara ao cliente sobre tarifas, encargos e limite contratado.</div>
+          <div class="comp-status"><span class="badge b-amber">Parametrização em revisão</span></div>
+        </div>
+        <div class="comp-card">
+          <div class="comp-norm">CMN 4.966</div>
+          <div class="comp-title">CDC / Crédito</div>
+          <div class="comp-desc">Contrato eletrônico com CET (Custo Efetivo Total), fórmulas reguladas e transparência obrigatória. Aplicável no Drop 5.</div>
+          <div class="comp-status"><span class="badge b-gray">Drop 5 — planejar</span></div>
+        </div>
+        <div class="comp-card">
+          <div class="comp-norm">PCI-DSS v4.0</div>
+          <div class="comp-title">Segurança Cartão</div>
+          <div class="comp-desc">Certificação obrigatória para emissão e processamento de cartões de débito (bandeiras Visa/Master). Prazo 6–8 semanas.</div>
+          <div class="comp-status"><span class="badge b-red">Não iniciado — Drop 4</span></div>
+        </div>
+      </div>
+
+      <div class="section-label">Checklist de conformidade Drop 3 — pré-produção</div>
+      <div class="card">
+        <div class="card-body">
+          <ul class="checklist">
+            <li class="cl-item"><div class="cl-box"></div><div class="cl-text"><strong>DICT homologado</strong> — evidência formal do BACEN recebida</div><div class="cl-norm">BCB 1/2020</div></li>
+            <li class="cl-item"><div class="cl-box"></div><div class="cl-text"><strong>MED implementado e testado</strong> — fluxo de devolução de fraudes PIX</div><div class="cl-norm">Art. 26 BCB 1</div></li>
+            <li class="cl-item"><div class="cl-box"></div><div class="cl-text"><strong>STR homologado</strong> — conectividade TED validada com BACEN</div><div class="cl-norm">Res. 4.282</div></li>
+            <li class="cl-item"><div class="cl-box"></div><div class="cl-text"><strong>Limites PIX dia/noite</strong> — parametrizados e ajustáveis pelo cliente</div><div class="cl-norm">BCB 1/2020</div></li>
+            <li class="cl-item"><div class="cl-box partial"></div><div class="cl-text"><strong>CMN 4.765 — Cheque Especial</strong> — spread, comunicação e tarifas conformes</div><div class="cl-norm">CMN 4.765</div></li>
+            <li class="cl-item"><div class="cl-box"></div><div class="cl-text"><strong>Monitoramento PLD/COAF</strong> — regras para PIX/TED documentadas e ativas</div><div class="cl-norm">Circ. 3.909</div></li>
+            <li class="cl-item"><div class="cl-box"></div><div class="cl-text"><strong>Teste de stress PIX</strong> — SLA 99,9% evidenciado com relatório</div><div class="cl-norm">Res. BCB 1</div></li>
+            <li class="cl-item"><div class="cl-box partial"></div><div class="cl-text"><strong>BCP/DRP</strong> — contingência SPI/STR validada e simulada</div><div class="cl-norm">Res. BCB 85</div></li>
+            <li class="cl-item"><div class="cl-box"></div><div class="cl-text"><strong>Plano de Transição</strong> — aprovado e assinado pelo BASA</div><div class="cl-norm">Anexo V 3.10</div></li>
+            <li class="cl-item"><div class="cl-box checked"></div><div class="cl-text"><strong>Trilha de auditoria</strong> — log imutável configurado (retenção 5 anos)</div><div class="cl-norm">Res. 4.557</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== GUIAS RÁPIDOS ====== -->
+    <div class="page" id="page-guias">
+      <div class="section-label">Referências e guias operacionais</div>
+      <div class="guide-grid">
+        <div class="guide-card">
+          <div class="g-icon">⚠</div>
+          <div class="g-title">Como registrar um risco no Jira (MDB)</div>
+          <div class="g-desc">Passo a passo para criação de issues de risco no projeto MDB com os campos obrigatórios: probabilidade, impacto, norma BACEN vinculada, owner e prazo de resposta.</div>
+          <div class="g-tags"><span class="g-tag">Jira</span><span class="g-tag">MDB</span><span class="g-tag">Riscos</span></div>
+        </div>
+        <div class="guide-card">
+          <div class="g-icon">↺</div>
+          <div class="g-title">Fluxo de aprovação de mudanças (MUD)</div>
+          <div class="g-desc">Processo completo: abertura de solicitação → análise de impacto → aprovação BASA → atualização do Roadmap → comunicação às partes interessadas → execução.</div>
+          <div class="g-tags"><span class="g-tag">OCM</span><span class="g-tag">BASA</span><span class="g-tag">SLA</span></div>
+        </div>
+        <div class="guide-card">
+          <div class="g-icon">✓</div>
+          <div class="g-title">Checklist regulatório BACEN por drop</div>
+          <div class="g-desc">Lista completa de obrigações regulatórias por drop: qual norma, qual evidência exigida, quem é o responsável e qual o critério de aceite para o TAF.</div>
+          <div class="g-tags"><span class="g-tag">BACEN</span><span class="g-tag">Compliance</span><span class="g-tag">TAF</span></div>
+        </div>
+        <div class="guide-card">
+          <div class="g-icon">▦</div>
+          <div class="g-title">Entregáveis mensais — prazo e aceite</div>
+          <div class="g-desc">Todos os 8 entregáveis mensais obrigatórios do Anexo V com prazos: entrega até o 7º dia, aceite BASA em 5 dias, ajustes em 3 dias, limite final no 15º dia.</div>
+          <div class="g-tags"><span class="g-tag">Anexo V</span><span class="g-tag">SLA</span><span class="g-tag">Mensal</span></div>
+        </div>
+        <div class="guide-card">
+          <div class="g-icon">⊘</div>
+          <div class="g-title">Fórmula de remuneração e SLA (FA)</div>
+          <div class="g-desc">Como calcular o Fator de Atendimento (FA) e a Remuneração Efetiva (RE): RE = 0,85×RTPC + 0,15×RTPC×FA. Cada artefato atrasado gera FI = 0,03/dia.</div>
+          <div class="g-tags"><span class="g-tag">SLA</span><span class="g-tag">Multa</span><span class="g-tag">Faturamento</span></div>
+        </div>
+        <div class="guide-card">
+          <div class="g-icon">⊕</div>
+          <div class="g-title">Processo de homologação BACEN</div>
+          <div class="g-desc">Como iniciar e acompanhar homologação do DICT, STR, SISBAJUD e APIs regulatórias. Prazos típicos: 4 a 8 semanas. Iniciativas que precisam começar no Drop 3.</div>
+          <div class="g-tags"><span class="g-tag">BACEN</span><span class="g-tag">DICT</span><span class="g-tag">STR</span><span class="g-tag">SISBAJUD</span></div>
+        </div>
+        <div class="guide-card">
+          <div class="g-icon">⌂</div>
+          <div class="g-title">Termos de aceite — TADP, TAF, TADC, TADS</div>
+          <div class="g-desc">Diferença entre os 4 termos contratuais: quando emitir cada um, quem assina, o que libera (faturamento, próxima fase, encerramento do projeto).</div>
+          <div class="g-tags"><span class="g-tag">Contrato</span><span class="g-tag">BASA</span><span class="g-tag">Aceite</span></div>
+        </div>
+        <div class="guide-card">
+          <div class="g-icon">⊞</div>
+          <div class="g-title">Matriz de responsabilidades por drop</div>
+          <div class="g-desc">RACI completa do projeto: quem é responsável por cada entregável, quem aprova no BASA, quem executa na CONTRATADA e quem é consultado por área regulatória.</div>
+          <div class="g-tags"><span class="g-tag">RACI</span><span class="g-tag">Governança</span><span class="g-tag">Drops</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /shell -->
+
+<script>
+const pages = {
+  visao: { el: 'page-visao', title: 'Visão Geral' },
+  riscos: { el: 'page-riscos', title: 'Riscos' },
+  mudancas: { el: 'page-mudancas', title: 'Mudanças' },
+  parceiros: { el: 'page-parceiros', title: 'Parceiros' },
+  issues: { el: 'page-issues', title: 'Issues Críticas' },
+  auditoria: { el: 'page-auditoria', title: 'Auditoria' },
+  compliance: { el: 'page-compliance', title: 'Compliance BACEN' },
+  guias: { el: 'page-guias', title: 'Guias Rápidos' }
+};
+
+function nav(key) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(pages[key].el).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.trim().startsWith(getIcon(key))) n.classList.add('active');
+  });
+  document.getElementById('page-title').textContent = pages[key].title;
+}
+
+function getIcon(key) {
+  const map = { visao:'⌂', riscos:'⚠', mudancas:'↺', parceiros:'⊕', issues:'⊘', auditoria:'▦', compliance:'✓', guias:'⊞' };
+  return map[key] || '';
+}
+
+document.querySelectorAll('.nav-item').forEach((item, i) => {
+  const keys = Object.keys(pages);
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    const key = keys[i];
+    document.getElementById(pages[key].el).classList.add('active');
+    document.getElementById('page-title').textContent = pages[key].title;
+  });
+});
+
+function exportCSV() {
+  const data = [
+    ['Tipo','ID','Descrição','Drop','Norma','Status'],
+    ['Risco','R-001','DICT não homologado — PIX bloqueado','D3','Res. BCB 1/2020','Crítico'],
+    ['Risco','R-002','MED não implementado','D3','Art. 26 BCB 1','Crítico'],
+    ['Risco','R-003','STR sem homologação TED','D3','Res. 4.282','Crítico'],
+    ['Risco','R-004','CMN 4.765 — Cheque Especial sem conformidade','D3','CMN 4.765','Crítico'],
+    ['Risco','R-005','PLD/COAF sem cobertura PIX/TED','D3','Circ. 3.909','Crítico'],
+    ['Risco','R-006','SLA 99,9% PIX sem stress test','D3','Res. BCB 1','Crítico'],
+    ['Issue','ISS-088','DICT não homologado','D3','BCB 1/2020','Bloqueante'],
+    ['Issue','ISS-091','MED não implementado','D3','Art. 26','Bloqueante'],
+    ['Issue','ISS-094','Plano de Transição D3 sem aceite BASA','D3','Anexo V 3.10','Bloqueante'],
+    ['Mudança','MUD-041','Ajuste limite noturno PIX','D3','Regulatório','Em análise'],
+    ['Mudança','MUD-042','Campo PEP no onboarding','D1','Funcional','Aguardando'],
+    ['Mudança','MUD-044','Postergação D4 APIs BACEN','D4','Cronograma','Pendente BASA'],
+  ];
+  const csv = data.map(r => r.join(';')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'basa-pmo-mvp1.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+const d = new Date();
+document.getElementById('topbar-date').textContent =
+  d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · MVP-1 Core Banking';
+</script>
+</body>
+</html>
