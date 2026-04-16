@@ -122,7 +122,7 @@ async function getAllIssues(jql: string, fields: string, maxTotal = 1000): Promi
     });
 
     // ✅ Endpoint correto: /rest/api/3/search
-    const data = await jiraGet(`/rest/api/3/search/jql?${params.toString()}`);
+    const data = await jiraGet(`/rest/api/3/search?${params.toString()}`);
     const issues: any[] = data.issues ?? [];
     total = data.total ?? 0;
     all = [...all, ...issues];
