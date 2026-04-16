@@ -4,8 +4,7 @@ const JIRA_HOST = 'deskcorp.atlassian.net';
 const JIRA_API_URL = `https://${JIRA_HOST}/rest/api/3`;
 
 const EMAIL = 'carol.siqueira@deskcorp.com.br';
-const API_TOKEN = const JIRA_TOKEN = process.env.JIRA_API_TOKEN;
-
+const JIRA_TOKEN = process.env.JIRA_API_TOKEN;
 export const PROJECTS = [
   { key: 'DD', name: 'Desenvolvimento & Delivery' },
   { key: 'DB', name: 'Diário de Bordo' },
@@ -38,8 +37,8 @@ export interface JiraIssue {
 const jiraClient = axios.create({
   baseURL: JIRA_API_URL,
   auth: {
-    username: EMAIL,
-    password: API_TOKEN,
+     username: EMAIL,
+    password: JIRA_TOKEN,
   },
   timeout: 10000,
 });
