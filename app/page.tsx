@@ -394,7 +394,7 @@ export default function GovernancaDashboard() {
   const [data, setData]       = useState<GovData|null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState('');
-  const [aba, setAba]         = useState<'overview'|'riscos'|'mudancas'|'parceiros'|'auditoria'|'jira'|'compliance'|'guias'>('overview');
+  const [aba, setAba]         = useState<'overview'|'riscos'|'mudancas'|'parceiros'|'auditoria'|'jira'|'compliance'|'auditoria-legal'|'guias'>('overview');
   const [dropFiltro, setDropFiltro]   = useState('Todos');
   const [moduloFiltro, setModuloFiltro] = useState('Todos');
   const [complianceDrop, setComplianceDrop] = useState('D1');
@@ -494,6 +494,7 @@ export default function GovernancaDashboard() {
     { key:'jira',       label:'🔗 Issues Críticas',  badge: data?.summary.totalCriticas },
     { key:'auditoria',  label:'📅 Auditoria',        badge: null },
     { key:'compliance', label:'✓ Compliance',        badge: null },
+    { key:'auditoria-legal', label:'⚖ Auditoria Legal', badge: null },
     { key:'guias',      label:'📘 Guias Rápidos',    badge: null },
   ] as const;
 
@@ -1335,6 +1336,162 @@ export default function GovernancaDashboard() {
                 );
               })()}
             </>}
+
+
+            {/* ══════════════════════════════════════
+                AUDITORIA LEGAL
+            ══════════════════════════════════════ */}
+            {aba === 'auditoria-legal' && (() => {
+              const normas = [
+                { bloco:'Cibersegurança', nome:'Res. CMN 5.274/2025 + Res. BCB 538/2025', orgao:'Banco Central', status:'vencido', prazo:'VENCIDO 01/03/2026', desc:'14 controles mínimos para RSFN/PIX/STR: MFA, criptografia, isolamento em nuvem, pentest anual, trilhas de auditoria. Prazo venceu em 01/03/2026.', tags:['MFA','Pentest','Criptografia','RSFN'], pdrs:['PDR-21','PDR-76','PDR-112'] },
+                { bloco:'PSTIs', nome:'Res. BCB 498/2025 (alt. 547/2026)', orgao:'Banco Central', status:'atencao', prazo:'Adequação até mai/2026', desc:'Credenciamento obrigatório de fornecedores de TI. Temenos, Tailwind, Corebanx e Neurotech precisam de due diligence formal com cláusulas de auditabilidade.', tags:['Temenos','Tailwind','Corebanx'], pdrs:['PDR-85','PDR-72'] },
+                { bloco:'PIX / SPB', nome:'Res. BCB 1/2020 + Reg. Pix + BCB 103/2021', orgao:'Banco Central', status:'critico', prazo:'Vigente — operação contínua', desc:'SLA 10s, disponibilidade 24/7, DICT, MED, antifraude obrigatório. 60+ MDB bloqueados por APIs Corebanx não entregues.', tags:['PIX','SPI','DICT','MED','SLA'], pdrs:['PDR-48','PDR-78','PDR-62'] },
+                { bloco:'LGPD', nome:'Lei 13.709/2018 + Res. CD/ANPD 15/2024', orgao:'ANPD', status:'critico', prazo:'Vigente — fiscalização ativa', desc:'DPO, DPIA, consentimento, notificação em 72h. Dados reais em QA/UAT (PDR-37) = violação ativa. Privacy by design obrigatório.', tags:['DPO','DPIA','Consentimento','Incidente'], pdrs:['PDR-37','PDR-13','PDR-63'] },
+                { bloco:'PLD/FT', nome:'Circ. BCB 3.978/2020 + Lei 9.613/1998', orgao:'COAF / BACEN', status:'critico', prazo:'Vigente — aplicação contínua', desc:'KYC reforçado: biometria, prova de vida, listas PEP e sanções ONU. Monitoramento transacional e comunicação ao COAF.', tags:['KYC','COAF','AML','PEP'], pdrs:['PDR-10','PDR-65','PDR-83'] },
+                { bloco:'PCI-DSS', nome:'PCI-DSS v4.0', orgao:'PCI Security Council', status:'critico', prazo:'Bloqueador go-live D4', desc:'Certificação obrigatória para Visa Electron/ATM D4 via ISO 8583/TecBan. PDR-36 registra não conformidade. Bloqueador direto do Drop D4.', tags:['Cartão','ATM','ISO 8583'], pdrs:['PDR-36'] },
+                { bloco:'Governança', nome:'Res. CMN 4.557/2017 — GIR', orgao:'CMN / BACEN', status:'atencao', prazo:'Vigente', desc:'CRO obrigatório. Todo produto digital precisa de gate de aprovação com evidências documentadas antes do go-live.', tags:['CRO','GIR','Gate go-live'], pdrs:['PDR-86','PDR-44'] },
+                { bloco:'Open Finance', nome:'Res. Conjunta CMN/BCB 1/2020', orgao:'Banco Central', status:'atencao', prazo:'Participação obrigatória', desc:'BASA é participante obrigatório. APIs padronizadas, consentimento granular, SLAs de disponibilidade, portabilidade com TPPs.', tags:['APIs','Consentimento','TPP'], pdrs:['PDR-76'] },
+                { bloco:'Estatais / FNO', nome:'Lei 13.303/2016 + Lei 7.827/1989', orgao:'TCU / CGU', status:'atencao', prazo:'Vigente', desc:'Contratações precisam de licitação ou dispensa fundamentada. FNO: digitalização do Pronaf exige formalização integral do MCR para evitar glosa TCU.', tags:['TCU','FNO','Pronaf','MCR'], pdrs:['PDR-85','PDR-68'] },
+              ];
+              const matriz = [
+                { bloco:'Cibersegurança', norma:'Res. BCB 538/2025', risco:'14 controles RSFN/PIX não atendidos — prazo vencido 01/03/2026', pdrs:'PDR-21, PDR-76', impacto:'Multa BACEN + suspensão PIX', crit:'CRÍTICA', cor:'#FEE2E2', tc:'#DC2626' },
+                { bloco:'PLD/FT', norma:'Circ. 3.978/2020', risco:'KYC frágil, biometria não formalizada, listas incompletas', pdrs:'PDR-65, PDR-83', impacto:'PAS BACEN + COAF', crit:'CRÍTICA', cor:'#FEE2E2', tc:'#DC2626' },
+                { bloco:'LGPD', norma:'Lei 13.709/2018', risco:'Dados reais em QA/UAT sem mascaramento (violação ativa)', pdrs:'PDR-37, PDR-13', impacto:'Até 2% faturamento — ANPD', crit:'CRÍTICA', cor:'#FEE2E2', tc:'#DC2626' },
+                { bloco:'PIX / SPB', norma:'Res. BCB 1/2020', risco:'60+ MDB bloqueados, APIs não entregues, SLA não validado', pdrs:'PDR-48, PDR-78', impacto:'Sanção BACEN + perda clientes', crit:'CRÍTICA', cor:'#FEE2E2', tc:'#DC2626' },
+                { bloco:'PCI-DSS', norma:'PCI-DSS v4.0', risco:'Ambiente não certificado para Visa Electron / ATM D4', pdrs:'PDR-36', impacto:'Bloqueio go-live D4', crit:'CRÍTICA', cor:'#FEE2E2', tc:'#DC2626' },
+                { bloco:'PSTIs', norma:'Res. BCB 498/2025', risco:'Fornecedores TI sem due diligence regulatória', pdrs:'PDR-85, PDR-72', impacto:'Auditoria BACEN', crit:'ALTA', cor:'#FEF3C7', tc:'#D97706' },
+                { bloco:'Governança', norma:'Res. CMN 4.557/2017', risco:'Produtos sem gate de aprovação do CRO', pdrs:'PDR-44, PDR-86', impacto:'Descumprimento prudencial', crit:'ALTA', cor:'#FEF3C7', tc:'#D97706' },
+                { bloco:'Estatais', norma:'Lei 13.303/2016', risco:'Contratos sem conformidade com regime de estatais', pdrs:'PDR-85', impacto:'Anulação TCU', crit:'ALTA', cor:'#FEF3C7', tc:'#D97706' },
+                { bloco:'FNO / MCR', norma:'Lei 7.827/1989', risco:'Digitalização crédito rural sem preservar formalização MCR', pdrs:'PDR-68', impacto:'Glosa TCU + devolução FNO', crit:'MÉDIA-ALTA', cor:'#FED7AA', tc:'#C2410C' },
+                { bloco:'Open Finance', norma:'Res. CMN/BCB 1/2020', risco:'APIs OF fora das especificações do ecossistema', pdrs:'PDR-76', impacto:'Sanção BACEN', crit:'MÉDIA', cor:'#FEF9C3', tc:'#A16207' },
+              ];
+              const prog = [
+                { l:'Cibersegurança (BCB 538)', p:5, c:'#DC2626' },
+                { l:'LGPD / ANPD', p:15, c:'#DC2626' },
+                { l:'PIX / SPB', p:25, c:'#D97706' },
+                { l:'PCI-DSS v4.0 (D4)', p:10, c:'#DC2626' },
+                { l:'PSTIs (BCB 498/2025)', p:20, c:'#DC2626' },
+                { l:'PLD/FT (KYC/COAF)', p:30, c:'#D97706' },
+                { l:'Governança / GIR', p:40, c:'#D97706' },
+                { l:'SISBAJUD / Judicial', p:45, c:'#D97706' },
+                { l:'Open Finance', p:35, c:'#D97706' },
+                { l:'Estatais / FNO / MCR', p:50, c:'#16A34A' },
+              ];
+              const sColor: Record<string,{bg:string,c:string,l:string}> = {
+                vencido:  {bg:'#FEE2E2',c:'#DC2626',l:'VENCIDO'},
+                critico:  {bg:'#FEE2E2',c:'#DC2626',l:'Crítico'},
+                atencao:  {bg:'#FEF3C7',c:'#D97706',l:'Atenção'},
+                adequado: {bg:'#DCFCE7',c:'#16A34A',l:'Adequado'},
+              };
+              return (
+                <>
+                  {/* Alertas */}
+                  <div style={{background:'#FEE2E2',border:'1px solid #FCA5A5',borderRadius:8,padding:'10px 16px',fontSize:12,color:'#DC2626',marginBottom:8}}>
+                    <strong>VENCIDO 01/03/2026</strong> — Res. CMN 5.274/2025 + Res. BCB 538/2025: 14 controles mínimos de cibersegurança para RSFN/PIX/STR. O BASA já opera em situação de não conformidade com risco de suspensão do acesso ao SPI.
+                  </div>
+                  <div style={{background:'#FEF3C7',border:'1px solid #FCD34D',borderRadius:8,padding:'10px 16px',fontSize:12,color:'#D97706',marginBottom:8}}>
+                    <strong>PRAZO MAI/2026</strong> — Res. BCB 498/2025 (PSTIs): due diligence regulatória obrigatória para Temenos, Tailwind, Corebanx e Neurotech com cláusulas de auditabilidade e portabilidade de dados.
+                  </div>
+                  <div style={{background:'#EFF6FF',border:'1px solid #BFDBFE',borderRadius:8,padding:'10px 16px',fontSize:12,color:'#1D4ED8',marginBottom:16}}>
+                    <strong>RISCO PATRIMONIAL</strong> — FNO/MCR: digitalização de crédito rural sem preservar formalização exigida gera risco de glosa pelo TCU e devolução de recursos ao Fundo Constitucional do Norte.
+                  </div>
+
+                  {/* Métricas */}
+                  <div className="g4" style={{marginBottom:16}}>
+                    <KpiCard label="Normas mapeadas"   value={28}      color="#1B6EC2" bgColor="#DBEAFE" sub="Federais + BACEN + ANPD"/>
+                    <KpiCard label="Riscos com impacto legal" value={31} color="#DC2626" bgColor="#FEE2E2" sub="de 111 PDRs abertos"/>
+                    <KpiCard label="Penalidade máx."   value="R$50M+"   color="#D97706" bgColor="#FEF3C7" sub="BACEN + ANPD + TCU"/>
+                    <KpiCard label="Adequação geral"   value="26%"      color="#DC2626" bgColor="#FEE2E2" sub="7 de 28 normas atendidas"/>
+                  </div>
+
+                  {/* Normas */}
+                  <div className="card">
+                    <div className="card-head"><div className="card-title">Requisitos normativos — clique para expandir</div></div>
+                    <div style={{padding:'12px 16px',display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:10}}>
+                      {normas.map((n,i) => {
+                        const sc = sColor[n.status] ?? sColor.atencao;
+                        return (
+                          <details key={i} style={{border:'1px solid #E2E8F0',borderRadius:10,padding:'12px 14px',background:'#fff'}}>
+                            <summary style={{cursor:'pointer',listStyle:'none',display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:8}}>
+                              <div>
+                                <div style={{fontSize:12,fontWeight:700,color:'#0F172A',lineHeight:1.4}}>{n.nome}</div>
+                                <div style={{fontSize:10,color:'#64748B',marginTop:2}}>{n.orgao} · {n.prazo}</div>
+                              </div>
+                              <span style={{fontSize:10,fontWeight:700,padding:'2px 8px',borderRadius:999,background:sc.bg,color:sc.c,flexShrink:0}}>{sc.l}</span>
+                            </summary>
+                            <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid #F1F5F9',fontSize:11,color:'#475569',lineHeight:1.6}}>
+                              {n.desc}
+                              <div style={{display:'flex',flexWrap:'wrap',gap:4,marginTop:8}}>
+                                {n.tags.map(t=><span key={t} style={{fontSize:10,padding:'2px 7px',borderRadius:999,background:'#F1F5F9',color:'#64748B'}}>{t}</span>)}
+                              </div>
+                              {n.pdrs.length>0 && <div style={{marginTop:6,fontSize:10,color:'#94A3B8'}}>PDRs: {n.pdrs.map(p=><span key={p} style={{fontFamily:'monospace',color:'#1B6EC2',marginRight:4}}>{p}</span>)}</div>}
+                            </div>
+                          </details>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Matriz */}
+                  <div className="card">
+                    <div className="card-head"><div className="card-title">Matriz de riscos regulatórios</div></div>
+                    <div style={{overflowX:'auto'}}>
+                      <table className="tbl">
+                        <thead><tr>
+                          <th>Bloco</th><th>Norma</th><th>Risco no MVP-1</th><th>PDRs</th><th>Impacto</th><th className="c">Criticidade</th>
+                        </tr></thead>
+                        <tbody>
+                          {matriz.map((m,i)=>(
+                            <tr key={i}>
+                              <td><span style={{fontSize:10,padding:'2px 8px',borderRadius:4,background:'#F1F5F9',color:'#475569'}}>{m.bloco}</span></td>
+                              <td style={{fontSize:10,color:'#64748B',maxWidth:160}}>{m.norma}</td>
+                              <td style={{maxWidth:220,fontSize:11}}>{m.risco}</td>
+                              <td style={{fontFamily:'monospace',fontSize:10,color:'#1B6EC2'}}>{m.pdrs}</td>
+                              <td style={{fontSize:10,color:'#64748B'}}>{m.impacto}</td>
+                              <td className="c"><span style={{fontSize:10,fontWeight:700,padding:'2px 8px',borderRadius:4,background:m.cor,color:m.tc}}>{m.crit}</span></td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Progresso */}
+                  <div className="card">
+                    <div className="card-head"><div className="card-title">Progresso de adequação por bloco regulatório</div></div>
+                    <div style={{padding:'12px 16px'}}>
+                      {prog.map(p=>(
+                        <div key={p.l} style={{display:'flex',alignItems:'center',gap:12,marginBottom:8}}>
+                          <span style={{fontSize:11,color:'#64748B',minWidth:200}}>{p.l}</span>
+                          <div style={{flex:1,height:6,background:'#E2E8F0',borderRadius:3}}>
+                            <div style={{height:6,borderRadius:3,background:p.c,width:`${p.p}%`}}/>
+                          </div>
+                          <span style={{fontSize:11,color:'#64748B',minWidth:32,textAlign:'right'}}>{p.p}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Especificidades BASA */}
+                  <div className="card">
+                    <div className="card-head"><div className="card-title">Especificidades do BASA — empresa estatal federal</div></div>
+                    <div style={{padding:'12px 16px',display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:10}}>
+                      {[
+                        {t:'Lei 13.303/2016 — Estatais', d:'Contratos com Temenos, Tailwind e Corebanx precisam de licitação ou dispensa fundamentada. TCU pode anular contratos e responsabilizar gestores individualmente.'},
+                        {t:'FNO + Manual de Crédito Rural', d:'BASA é administrador do FNO. Digitalização do Pronaf exige preservar garantias, laudos e fiscalização física. Desvio gera glosa e devolução ao fundo.'},
+                        {t:'BAZA3 — Companhia Aberta', d:'Deveres informacionais à CVM. Atrasos relevantes no go-live ou incidentes cibernéticos podem configurar fato relevante de divulgação obrigatória.'},
+                        {t:'LAI + Lei Anticorrupção', d:'Leis 12.527/2011 e 12.846/2013 exigem transparência ativa e programa de integridade. Logs rastreáveis são obrigatórios para LGPD e fiscalização TCU/CGU.'},
+                      ].map(e=>(
+                        <div key={e.t} style={{background:'#F8FAFC',borderRadius:8,padding:'12px 14px'}}>
+                          <div style={{fontSize:12,fontWeight:700,color:'#0F172A',marginBottom:6}}>{e.t}</div>
+                          <div style={{fontSize:11,color:'#64748B',lineHeight:1.6}}>{e.d}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
 
             {/* ══════════════════════════════════════
                 GUIAS RÁPIDOS
